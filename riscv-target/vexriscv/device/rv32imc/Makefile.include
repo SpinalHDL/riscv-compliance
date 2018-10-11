@@ -1,0 +1,45 @@
+TARGET_SIM ?= echo
+#ifeq ($(shell command -v $(TARGET_SIM) 2> /dev/null),)
+#    $(error Target simulator executable '$(TARGET_SIM)` not found)
+#endif
+
+RUN_TARGET=\
+    $(TARGET_SIM) --isa=rv32imc \
+        +signature=$(work_dir_isa)/$(*)_signature.output \
+        $(work_dir_isa)/$< 2> $(work_dir_isa)/$@
+
+RISCV_PREFIX   ?= riscv32-unknown-elf-
+RISCV_GCC      ?= $(RISCV_PREFIX)gcc
+RISCV_OBJDUMP  ?= $(RISCV_PREFIX)objdump
+RISCV_OBJCOPY  ?= $(RISCV_PREFIX)objcopy
+RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DRVC
+
+COMPILE_TARGET=\
+	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) \
+		-I$(ROOTDIR)/riscv-test-env/ \
+		-I$(ROOTDIR)/riscv-test-env/p/ \
+		-I$(ROOTDIR)/riscv-target/$(RISCV_TARGET)/ \
+		-T$(ROOTDIR)/riscv-test-env/p/link.ld $$< \
+		-o $(work_dir_isa)/$$@; \
+	$$(RISCV_OBJDUMP) -D $(work_dir_isa)/$$@ > $(work_dir_isa)/$$@.objdump; \
+    $$(RISCV_OBJCOPY) -O ihex $(work_dir_isa)/$$@ $(work_dir_isa)/$$@.hex
+
+
+# export RISCV_PREFIX=riscv64-unknown-elf-
+# make
+prepear:
+	make RISCV_TARGET=vexriscv RISCV_DEVICE=rv32imc
+	cp -f work/I.*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/I.*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f work/C.*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/C.*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f work/MUL*.*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/MUL*.*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f work/DIV*.*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/DIV*.*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f work/REM*.*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/REM*.*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f riscv-test-suite/rv32i/references/* /home/spinalvm/hdl/VexRiscv/src/test/resources/ref
+	cp -f riscv-test-suite/rv32im/references/* /home/spinalvm/hdl/VexRiscv/src/test/resources/ref
+	cp -f riscv-test-suite/rv32imc/references/* /home/spinalvm/hdl/VexRiscv/src/test/resources/ref
+	sed -i 's/\r//g' /home/spinalvm/hdl/VexRiscv/src/test/resources/ref/*

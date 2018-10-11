@@ -1,0 +1,32 @@
+TARGET_SIM ?= echo
+#ifeq ($(shell command -v $(TARGET_SIM) 2> /dev/null),)
+#    $(error Target simulator executable '$(TARGET_SIM)` not found)
+#endif
+
+RUN_TARGET=\
+    $(TARGET_SIM) --isa=rv32i \
+        +signature=$(work_dir_isa)/$(*)_signature.output \
+        $(work_dir_isa)/$< 2> $(work_dir_isa)/$@
+
+RISCV_PREFIX   ?= riscv32-unknown-elf-
+RISCV_GCC      ?= $(RISCV_PREFIX)gcc
+RISCV_OBJDUMP  ?= $(RISCV_PREFIX)objdump
+RISCV_OBJCOPY  ?= $(RISCV_PREFIX)objcopy
+RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
+
+COMPILE_TARGET=\
+	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) \
+		-I$(ROOTDIR)/riscv-test-env/ \
+		-I$(ROOTDIR)/riscv-test-env/p/ \
+		-I$(ROOTDIR)/riscv-target/$(RISCV_TARGET)/ \
+		-T$(ROOTDIR)/riscv-test-env/p/link.ld $$< \
+		-o $(work_dir_isa)/$$@; \
+	$$(RISCV_OBJDUMP) -D $(work_dir_isa)/$$@ > $(work_dir_isa)/$$@.objdump; \
+    $$(RISCV_OBJCOPY) -O ihex $(work_dir_isa)/$$@ $(work_dir_isa)/$$@.hex
+
+prepear:
+	make clean; make RISCV_TARGET=vexriscv RISCV_DEVICE=rv32i
+#readelf -a work/I-ADDI-01.elf | grep codasip_signature_start | grep -o -E '[0-9]+' | head -n2 | tail -n1
+	cp -f work/*.hex /home/spinalvm/hdl/VexRiscv/src/test/resources/hex
+	cp -f work/*.objdump /home/spinalvm/hdl/VexRiscv/src/test/resources/asm
+	cp -f riscv-test-suite/rv32i/references/* /home/spinalvm/hdl/VexRiscv/src/test/resources/ref
