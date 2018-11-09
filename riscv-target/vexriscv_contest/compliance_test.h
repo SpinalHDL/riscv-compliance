@@ -16,7 +16,7 @@
 #define RV_COMPLIANCE_HALT                                                    \
         la a0, codasip_signature_start;                                        \
         la a1, codasip_signature_end; \
-        li a2, 0xF0000; \
+        li a2, UART_BASE; \
 complience_halt_loop: \
         beq a0, a1, complience_halt_break; \
         addi a3, a0, 16; \
@@ -64,35 +64,11 @@ complience_halt_break:; \
 #define RV_COMPLIANCE_RV32M                                                   \
 
 //Nops are for RVC JAL test which require offset
-#ifdef RVC
 #define RV_COMPLIANCE_CODE_BEGIN                                              \
         .section .text.init;                                                  \
         .align  4;                                                            \
         .globl _start;                                                        \
-        _start:                                                               \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop;nop; \
-        nop;nop;nop;nop;nop;nop;nop; 
-#else
-#define RV_COMPLIANCE_CODE_BEGIN                                              \
-        .section .text.init;                                                  \
-        .align  4;                                                            \
-        .globl _start;                                                        \
-        _start:                                                               
-#endif
-
+        _start:
 
 #define RV_COMPLIANCE_CODE_END                                                \
 

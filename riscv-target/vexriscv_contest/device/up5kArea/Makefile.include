@@ -1,22 +1,22 @@
 
 CONTEST_ROOT?=${shell pwd}/../../../..
-RUN_TARGET=make -C ${CONTEST_ROOT}/test/igloo2Perf run ARGS='--iramBin $(work_dir_isa)/$<.bin --bootloader ${CONTEST_ROOT}/software/bootloader/igloo2Perf/noFlash.bin  --timeout 2000000';\
-    cp ${CONTEST_ROOT}/test/igloo2Perf/log.txt $(work_dir_isa)/$(*)_signature.output; 
-#   cp /home/spinalvm/hdl/riscvSoftcoreContest/test/igloo2Perf/wave.vcd $(work_dir_isa)/$(*)_wave.vcd
+RUN_TARGET=make -C ${CONTEST_ROOT}/test/up5kArea run ARGS='--iramBin $(work_dir_isa)/$<.bin --bootloader ${CONTEST_ROOT}/software/bootloader/up5kArea/noFlash.bin  --timeout 2000000';\
+    cp ${CONTEST_ROOT}/test/up5kArea/log.txt $(work_dir_isa)/$(*)_signature.output;
+  # cp /home/spinalvm/hdl/riscvSoftcoreContest/test/up5kArea/wave.vcd $(work_dir_isa)/$(*)_wave.vcd
 
 
 RISCV_PREFIX   ?= ${ZEPHYR_SDK_INSTALL_DIR}/sysroots/x86_64-pokysdk-linux/usr/bin/riscv32-zephyr-elf/riscv32-zephyr-elf-
 RISCV_GCC      ?= $(RISCV_PREFIX)gcc
 RISCV_OBJDUMP  ?= $(RISCV_PREFIX)objdump
 RISCV_OBJCOPY  ?= $(RISCV_PREFIX)objcopy
-RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DUART_BASE=0xF0000
+RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -DUART_BASE=0x70000
 
 COMPILE_TARGET=\
 	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) \
 		-I$(ROOTDIR)/riscv-test-env/ \
 		-I$(ROOTDIR)/riscv-test-env/p/ \
 		-I$(ROOTDIR)/riscv-target/$(RISCV_TARGET)/ \
-		-T$(ROOTDIR)/riscv-target/$(RISCV_TARGET)/device/igloo2Perf/link.ld $$< \
+		-T$(ROOTDIR)/riscv-target/$(RISCV_TARGET)/device/up5kArea/link.ld $$< \
 		-o $(work_dir_isa)/$$@; \
 	$$(RISCV_OBJDUMP) -D $(work_dir_isa)/$$@ > $(work_dir_isa)/$$@.objdump; \
 	$$(RISCV_OBJCOPY) -O binary $(work_dir_isa)/$$@ $(work_dir_isa)/$$@.bin
